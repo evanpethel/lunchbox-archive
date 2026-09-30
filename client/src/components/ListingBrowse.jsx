@@ -1,8 +1,7 @@
-import { mockListings } from "../mockListings"
 import ListingCard from "./ListingCard"
 import { useListingFilters } from "../hooks/useListingFilters"
 
-export default function ListingBrowse() {
+export default function ListingBrowse({ listings, onBuy }) {
   const {
     searchTerm, setSearchTerm,
     ageFilter, setAgeFilter,
@@ -10,7 +9,7 @@ export default function ListingBrowse() {
     makerFilter, setMakerFilter,
     ages, conditions, makers,
     filtered
-  } = useListingFilters(mockListings)
+  } = useListingFilters(listings)
 
   return (
     <div style={{ padding: 16 }}>
@@ -47,7 +46,7 @@ export default function ListingBrowse() {
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
         {filtered.map(listing => (
-          <ListingCard key={listing.id} listing={listing} />
+          <ListingCard key={listing.id} listing={listing} onBuy={onBuy} />
         ))}
       </div>
     </div>

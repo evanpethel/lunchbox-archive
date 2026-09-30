@@ -6,11 +6,14 @@ export function useListingFilters(listings) {
   const [conditionFilter, setConditionFilter] = useState("")
   const [makerFilter, setMakerFilter] = useState("")
 
-  const ages = [...new Set(listings.map(l => l.age))]
-  const conditions = [...new Set(listings.map(l => l.condition))]
-  const makers = [...new Set(listings.map(l => l.maker))]
+  // Only consider active (unsold) listings for filter options and results
+  const activeListings = listings.filter(l => l.status === "listed")
 
-  const filtered = listings.filter(listing => {
+  const ages = [...new Set(activeListings.map(l => l.age))]
+  const conditions = [...new Set(activeListings.map(l => l.condition))]
+  const makers = [...new Set(activeListings.map(l => l.maker))]
+
+  const filtered = activeListings.filter(listing => {
     const matchesSearch =
       searchTerm === "" ||
       listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
