@@ -2,7 +2,9 @@ import { ListingRepository } from "../repositories/post.repository.js";
 import { assertNonEmpty } from "../utils/validation.js";
 
 export const ListingService = {
+
     publish({ title, description, price, photoUrl, age, condition, maker, sellerID }) {
+
         assertNonEmpty(title, "title", "MISSING_TITLE");
         assertNonEmpty(price, "price", "MISSING_PRICE");
 
@@ -23,5 +25,12 @@ export const ListingService = {
     async listListed({ page = 1, pageSize = 10 }) {
         const { listings, hasMore } = await ListingRepository.findListing({ page, pageSize });
         return { listings, page, hasMore };
+    },
+
+    async getListing({ id }) {
+
+        assertNonEmpty(id, "id", "MISSING_ID");
+
+        return ListingRepository.findListing({ id });
     },
 };

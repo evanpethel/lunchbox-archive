@@ -1,0 +1,18 @@
+model User {
+    id int @id @default(uuid())
+    username String @unique
+    passwordHash String
+}
+
+enum PostStatus {
+    DRAFT
+    PUBLISHED
+}
+
+model Post {
+    id String @id @default(uuid())
+    title String
+    description String
+    price Float
+    :
+}

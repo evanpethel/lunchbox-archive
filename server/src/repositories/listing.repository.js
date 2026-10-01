@@ -19,4 +19,12 @@ export const ListingRepository = {
 
         return { listings: rows.slice(0, pageSize), hasMore };
     },
+
+    async findListing({ selectedId }) {
+        const listing = await prisma.post.findUnique({
+            where: { AND: [{id: selectedId}, {status: "listed"}] },
+        });
+
+        return { listing };
+    },
 };
