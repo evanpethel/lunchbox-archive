@@ -12,39 +12,29 @@ export default function ListingBrowse({ listings, onBuy }) {
   } = useListingFilters(listings)
 
   return (
-    <div style={{ padding: 16 }}>
-      <div style={{ marginBottom: 16 }}>
+    <div>
+      <div className="filter-bar">
         <input
           type="text"
           placeholder="Search listings..."
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
-          style={{ marginRight: 8, padding: 4 }}
         />
-
         <select value={ageFilter} onChange={e => setAgeFilter(e.target.value)}>
           <option value="">All Ages</option>
-          {ages.map(age => (
-            <option key={age} value={age}>{age}</option>
-          ))}
+          {ages.map(age => <option key={age} value={age}>{age}</option>)}
         </select>
-
         <select value={conditionFilter} onChange={e => setConditionFilter(e.target.value)}>
           <option value="">All Conditions</option>
-          {conditions.map(condition => (
-            <option key={condition} value={condition}>{condition}</option>
-          ))}
+          {conditions.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
-
         <select value={makerFilter} onChange={e => setMakerFilter(e.target.value)}>
           <option value="">All Makers</option>
-          {makers.map(maker => (
-            <option key={maker} value={maker}>{maker}</option>
-          ))}
+          {makers.map(m => <option key={m} value={m}>{m}</option>)}
         </select>
       </div>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
+      <div className="listing-grid">
         {filtered.map(listing => (
           <ListingCard key={listing.id} listing={listing} onBuy={onBuy} />
         ))}
