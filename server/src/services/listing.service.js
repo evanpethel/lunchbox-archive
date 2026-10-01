@@ -1,23 +1,22 @@
-import { ListingRepository } from "../repositories/post.repository.js";
-import { assertNonEmpty } from "../utils/validation.js";
+import { ListingRepository } from "../repositories/listing.repository.js";
+import { assertNonEmpty, assertPositiveNumber } from "../utils/validation.js";
 
 class ListingNotFoundError extends Error {}
+class ListingAlreadySoldError extends Error {}
 
 export const ListingService = {
 
-    publish({ title, description, price, photoUrl, age, condition, maker }) {
-
+    publish({ title, description, price, photoUrl, age, condition, maker, sellerId }) {
         assertNonEmpty(title, "title", "MISSING_TITLE");
-        assertNonEmpty(price, "price", "MISSING_PRICE");
+        assertPositiveNumber(price, "price", "MISSING_PRICE");
 
         return ListingRepository.create({
-            id,
             title,
             description,
             price,
             photoUrl,
             age,
-            contition,
+            condition,
             maker,
             status: "listed",
             sellerId,
@@ -33,29 +32,42 @@ export const ListingService = {
 
         assertNonEmpty(id, "id", "MISSING_ID");
 
-        return ListingRepository.findListing({ id });
+        const { listing } = await ListingRepository.findListing({ selectedId: id });
+
+        if (!listing) {
+            throw new ListingNotFoundError();
+        }
+
+        return listing;
     },
 
-    async editListing ({ id, title, description, price, photoUrl, age, condition, maker }) {
+    async editListing({ id, title, description, price, photoUrl, age, condition, maker }) {
 
         assertNonEmpty(id, "id", "MISSING_ID");
+        assertPositiveNumber(price, "price", "MISSING_PRICE");
 
-        return ListingRepository.editListingById({ id })
+        return ListingRepository.editListingById({ targetId: id, title, description, price, photoUrl, age, condition, maker });
     },
 
     async deleteListing({ id }) {
-        
+
         assertNonEmpty(id, "id", "MISSING_ID");
 
-        return ListingRepository.deleteListingById({ id });
+        return ListingRepository.deleteListingById({ targetListing: id });
     },
 
     async purchaseListing({ id }) {
-        
+
         assertNonEmpty(id, "id", "MISSING_ID");
 
-        return ListingRepository.purchase({ id });
+        const { sold } = await ListingRepository.purchase({ targetId: id });
+
+        if (!sold) {
+            throw new ListingAlreadySoldError();
+        }
+
+        return { id, status: "sold" };
     },
 };
 
-export {ListingNotFoundError};
+export { ListingNotFoundError, ListingAlreadySoldError };

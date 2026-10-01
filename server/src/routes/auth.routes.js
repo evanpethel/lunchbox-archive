@@ -3,7 +3,7 @@ import { AuthService, UsernameAlreadyRegisteredError, WeakPasswordError, Invalid
 
 const router = Router();
 
-router.post("/api/auth/register", async (req, res) => {
+router.post("/auth/register", async (req, res) => {
 
     try {
 
@@ -24,7 +24,7 @@ router.post("/api/auth/register", async (req, res) => {
     }
 });
 
-router.post("/api/auth/login", async (req, res) => {
+router.post("/auth/login", async (req, res) => {
 
     try {
 
@@ -40,4 +40,5 @@ router.post("/api/auth/login", async (req, res) => {
         res.status(400).json({ error: { code: "BAD_REQUEST", message: err.message } });
     }
 });
+
 export default router;
