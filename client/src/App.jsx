@@ -1,5 +1,4 @@
-import { useState } from "react"
-import { mockListings } from "./mockListings"
+import { useState, useEffect } from "react"
 import ListingBrowse from "./components/ListingBrowse"
 import ListingForm from "./components/ListingForm"
 import MyListings from "./components/MyListings"
@@ -7,30 +6,111 @@ import AuthForm from "./components/AuthForm"
 import { useAuth } from "./hooks/useAuth"
 import "./App.css"
 
+const API_BASE = "/api"
+
 function App() {
-  const [listings, setListings] = useState(mockListings)
+  const [listings, setListings] = useState([])
   const [view, setView] = useState("browse")
+  const [apiError, setApiError] = useState("")
   const { currentUser, register, login, logout, error } = useAuth()
 
-  function handleCreate(newListing) {
-    setListings([...listings, { ...newListing, id: Date.now(), status: "listed", sellerId: currentUser.id }])
-    setView("browse")
+  function authHeaders() {
+    return {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${localStorage.getItem("accessToken")}`
+    }
   }
 
-  function handleBuy(id) {
-    setListings(listings.map(listing =>
-      listing.id === id ? { ...listing, status: "sold" } : listing
-    ))
+  async function fetchListings() {
+    try {
+      const res = await fetch(`${API_BASE}/listings`)
+      const data = await res.json()
+      if (res.ok) {
+        setListings(data.listings)
+      }
+    } catch (err) {
+      setApiError("Could not load listings. Is the server running?")
+    }
   }
 
-  function handleEdit(id, updatedFields) {
-    setListings(listings.map(listing =>
-      listing.id === id ? { ...listing, ...updatedFields } : listing
-    ))
+  useEffect(() => {
+    fetchListings()
+  }, [])
+
+  async function handleCreate(newListing) {
+    setApiError("")
+    try {
+      const res = await fetch(`${API_BASE}/listings`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ ...newListing, sellerId: currentUser.id })
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setApiError(data.error.message)
+        return
+      }
+      await fetchListings()
+      setView("browse")
+    } catch (err) {
+      setApiError("Could not create listing. Is the server running?")
+    }
   }
 
-  function handleDelete(id) {
-    setListings(listings.filter(listing => listing.id !== id))
+  async function handleBuy(id) {
+    setApiError("")
+    try {
+      const res = await fetch(`${API_BASE}/listings/${id}/buy`, {
+        method: "POST",
+        headers: authHeaders()
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setApiError(data.error.message)  // e.g. "Listing is no longer available" on 409
+        await fetchListings()  // refresh so the now-stale "available" card updates
+        return
+      }
+      await fetchListings()
+    } catch (err) {
+      setApiError("Could not complete purchase. Is the server running?")
+    }
+  }
+
+  async function handleEdit(id, updatedFields) {
+    setApiError("")
+    try {
+      const res = await fetch(`${API_BASE}/listings/${id}`, {
+        method: "PUT",
+        headers: authHeaders(),
+        body: JSON.stringify(updatedFields)
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setApiError(data.error.message)
+        return
+      }
+      await fetchListings()
+    } catch (err) {
+      setApiError("Could not save changes. Is the server running?")
+    }
+  }
+
+  async function handleDelete(id) {
+    setApiError("")
+    try {
+      const res = await fetch(`${API_BASE}/listings/${id}`, {
+        method: "DELETE",
+        headers: authHeaders()
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        setApiError(data.error.message)
+        return
+      }
+      await fetchListings()
+    } catch (err) {
+      setApiError("Could not delete listing. Is the server running?")
+    }
   }
 
   return (
@@ -47,6 +127,8 @@ function App() {
           </div>
         ) : null}
       </header>
+
+      {apiError && <p className="error-text" style={{ padding: "0 24px" }}>{apiError}</p>}
 
       {!currentUser && <AuthForm onRegister={register} onLogin={login} error={error} />}
       {currentUser && view === "browse" && <ListingBrowse listings={listings} onBuy={handleBuy} />}
