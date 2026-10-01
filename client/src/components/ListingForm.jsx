@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-const initialForm = {
+const emptyForm = {
   title: "",
   description: "",
   price: "",
@@ -10,8 +10,8 @@ const initialForm = {
   maker: ""
 }
 
-export default function ListingForm({ onCreate }) {
-  const [form, setForm] = useState(initialForm)
+export default function ListingForm({ initialValues, onSubmit, submitLabel = "Create Listing" }) {
+  const [form, setForm] = useState(initialValues || emptyForm)
   const [error, setError] = useState("")
 
   function handleChange(e) {
@@ -21,30 +21,20 @@ export default function ListingForm({ onCreate }) {
   function handleSubmit(e) {
     e.preventDefault()
 
-    // Required-field check per Story 2 acceptance criteria
     const missingField = Object.entries(form).find(([, value]) => value === "")
     if (missingField) {
       setError(`Missing required field: ${missingField[0]}`)
       return
     }
 
-    const newListing = {
-      ...form,
-      id: Date.now(),      // temporary local id until the backend assigns real ones
-      price: parseFloat(form.price),
-      status: "listed",
-      sellerId: null        // will come from auth once login exists
-    }
-
-    onCreate(newListing)
-    setForm(initialForm)
+    onSubmit({ ...form, price: parseFloat(form.price) })
+    if (!initialValues) setForm(emptyForm)  // only reset on create, not edit
     setError("")
   }
 
   return (
     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 320, padding: 16 }}>
-      <h2>Create a Listing</h2>
-
+      <h2>{submitLabel}</h2>
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       <input name="title" placeholder="Title" value={form.title} onChange={handleChange} />
@@ -55,7 +45,7 @@ export default function ListingForm({ onCreate }) {
       <input name="condition" placeholder="Condition" value={form.condition} onChange={handleChange} />
       <input name="maker" placeholder="Maker" value={form.maker} onChange={handleChange} />
 
-      <button type="submit">Create Listing</button>
+      <button type="submit">{submitLabel}</button>
     </form>
   )
 }
