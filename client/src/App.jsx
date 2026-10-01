@@ -35,20 +35,20 @@ function App() {
 
   return (
     <div>
-      <h1>Lunchbox Archive</h1>
+      <header className="app-header">
+        <h1>Lunchbox Archive</h1>
+        {currentUser ? (
+          <div className="nav-actions">
+            <span>Hi, {currentUser.username}</span>
+            <button className="btn" onClick={() => setView("browse")}>Browse</button>
+            <button className="btn" onClick={() => setView("create")}>Create Listing</button>
+            <button className="btn" onClick={() => setView("mine")}>My Listings</button>
+            <button className="btn btn-primary" onClick={logout}>Log Out</button>
+          </div>
+        ) : null}
+      </header>
 
-      {currentUser ? (
-        <div style={{ marginBottom: 16 }}>
-          <span>Logged in as {currentUser.username}</span>
-          <button onClick={logout} style={{ marginLeft: 8 }}>Log Out</button>
-          <button onClick={() => setView("browse")} style={{ marginLeft: 8 }}>Browse</button>
-          <button onClick={() => setView("create")} style={{ marginLeft: 8 }}>Create Listing</button>
-          <button onClick={() => setView("mine")} style={{ marginLeft: 8 }}>My Listings</button>
-        </div>
-      ) : (
-        <AuthForm onRegister={register} onLogin={login} error={error} />
-      )}
-
+      {!currentUser && <AuthForm onRegister={register} onLogin={login} error={error} />}
       {currentUser && view === "browse" && <ListingBrowse listings={listings} onBuy={handleBuy} />}
       {currentUser && view === "create" && <ListingForm onSubmit={handleCreate} submitLabel="Create Listing" />}
       {currentUser && view === "mine" && (

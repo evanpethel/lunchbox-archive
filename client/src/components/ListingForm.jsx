@@ -28,14 +28,14 @@ export default function ListingForm({ initialValues, onSubmit, submitLabel = "Cr
     }
 
     onSubmit({ ...form, price: parseFloat(form.price) })
-    if (!initialValues) setForm(emptyForm)  // only reset on create, not edit
+    if (!initialValues) setForm(emptyForm)
     setError("")
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 320, padding: 16 }}>
+    <form onSubmit={handleSubmit} className="listing-form">
       <h2>{submitLabel}</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className="error-text">{error}</p>}
 
       <input name="title" placeholder="Title" value={form.title} onChange={handleChange} />
       <textarea name="description" placeholder="Description" value={form.description} onChange={handleChange} />
@@ -45,7 +45,7 @@ export default function ListingForm({ initialValues, onSubmit, submitLabel = "Cr
       <input name="condition" placeholder="Condition" value={form.condition} onChange={handleChange} />
       <input name="maker" placeholder="Maker" value={form.maker} onChange={handleChange} />
 
-      <button type="submit">{submitLabel}</button>
+      <button type="submit" className="btn btn-primary">{submitLabel}</button>
     </form>
   )
 }

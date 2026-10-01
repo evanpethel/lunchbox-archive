@@ -21,15 +21,15 @@ export default function MyListings({ listings, currentUser, onEdit, onDelete }) 
   }
 
   return (
-    <div style={{ padding: 16 }}>
-      <h2>My Listings</h2>
+    <div style={{ padding: "16px 24px" }}>
+      <h2 style={{ fontFamily: "'Bungee', cursive", color: "var(--teal)", fontSize: 22 }}>My Listings</h2>
       {myListings.length === 0 && <p>You haven't created any listings yet.</p>}
       {myListings.map(listing => (
-        <div key={listing.id} style={{ border: "1px solid #ccc", borderRadius: 8, padding: 12, marginBottom: 8 }}>
-          <strong>{listing.title}</strong> — ${listing.price} — {listing.status}
-          <div style={{ marginTop: 8 }}>
-            <button onClick={() => setEditingId(listing.id)}>Edit</button>
-            <button onClick={() => onDelete(listing.id)} style={{ marginLeft: 8 }}>Delete</button>
+        <div key={listing.id} className="my-listing-row">
+          <span><strong>{listing.title}</strong> — ${listing.price} — {listing.status}</span>
+          <div>
+            <button className="btn btn-primary" onClick={() => setEditingId(listing.id)}>Edit</button>
+            <button className="btn" style={{ borderColor: "var(--rust)", color: "var(--rust)", marginLeft: 8 }} onClick={() => onDelete(listing.id)}>Delete</button>
           </div>
         </div>
       ))}
