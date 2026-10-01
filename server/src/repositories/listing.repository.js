@@ -1,9 +1,9 @@
 import { prisma } from "../db/client.js";
 
 export const ListingRepository = {
-    create({ title, description, price, photoUrl, age, condition, maker, status, sellerId }) {
+    create({ id, title, description, price, photoUrl, age, condition, maker, status, sellerId }) {
         return prisma.post.create({
-            data: { title, description, price, photoUrl, age, condition, maker, status, sellerId },
+            data: { id, title, description, price, photoUrl, age, condition, maker, status, sellerId, soldTo },
         });
     },
 
@@ -26,5 +26,33 @@ export const ListingRepository = {
         });
 
         return { listing };
+    },
+
+    async editListingById ({targetId, title, description, price, photoUrl, age, condition, maker}) {
+
+        const listing = await prisma.post.update({
+            where: { id: targetId },
+            data: { title, description, price, photoUrl, age, condition, maker, status },
+        });
+        
+
+        return {listing};
+    },
+
+    async deleteListingById ({ targetListing }) {
+
+        const listing = await prisma.post.delete({
+            where: {id: targetListing},
+        });
+
+        return {listing};
+    },
+
+    async purchase ({ targetId }) {
+
+        const listing = await prisma.post.update({
+            where: {AND: [{id: targetId}, {status: "listed"}]},
+            data: { status: "sold" },
+        })
     },
 };
