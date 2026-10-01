@@ -1,9 +1,9 @@
 import { prisma } from "../db/client.js";
 
 export const ListingRepository = {
-    create({ id, title, description, price, photoUrl, age, condition, maker, status, sellerId }) {
+    create({ title, description, price, photoUrl, age, condition, maker, status, sellerId }) {
         return prisma.post.create({
-            data: { id, title, description, price, photoUrl, age, condition, maker, status, sellerId, soldTo },
+            data: { title, description, price, photoUrl, age, condition, maker, status, sellerId },
         });
     },
 
@@ -21,38 +21,41 @@ export const ListingRepository = {
     },
 
     async findListing({ selectedId }) {
-        const listing = await prisma.post.findUnique({
-            where: { AND: [{id: selectedId}, {status: "listed"}] },
+        const listing = await prisma.post.findFirst({
+            where: { id: selectedId, status: "listed" },
         });
 
         return { listing };
     },
 
-    async editListingById ({targetId, title, description, price, photoUrl, age, condition, maker}) {
+    async editListingById({ targetId, title, description, price, photoUrl, age, condition, maker }) {
 
         const listing = await prisma.post.update({
             where: { id: targetId },
-            data: { title, description, price, photoUrl, age, condition, maker, status },
+            data: { title, description, price, photoUrl, age, condition, maker },
         });
-        
 
-        return {listing};
+        return { listing };
     },
 
-    async deleteListingById ({ targetListing }) {
+    async deleteListingById({ targetListing }) {
 
         const listing = await prisma.post.delete({
-            where: {id: targetListing},
+            where: { id: targetListing },
         });
 
-        return {listing};
+        return { listing };
     },
 
-    async purchase ({ targetId }) {
+    async purchase({ targetId }) {
 
-        const listing = await prisma.post.update({
-            where: {AND: [{id: targetId}, {status: "listed"}]},
+        const result = await prisma.post.updateMany({
+            where: { id: targetId, status: "listed" },
             data: { status: "sold" },
-        })
+        });
+
+        // result.count is 0 if no row matched (already sold, or doesn't exist) —
+        // this is what makes the buy action safe against two simultaneous requests
+        return { sold: result.count > 0 };
     },
 };

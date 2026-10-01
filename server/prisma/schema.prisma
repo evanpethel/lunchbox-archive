@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String @id @default(uuid())
+  username     String @unique
+  passwordHash String
+  posts        Post[]
+}
+
+enum PostStatus {
+  listed
+  sold
+}
+
+model Post {
+  id          String     @id @default(uuid())
+  title       String
+  description String
+  price       Float
+  photoUrl    String
+  age         String
+  condition   String
+  maker       String
+  status      PostStatus @default(listed)
+  sellerId    String
+  seller      User       @relation(fields: [sellerId], references: [id])
+}
