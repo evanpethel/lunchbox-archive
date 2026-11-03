@@ -2,9 +2,7 @@
 
 All notable changes to Lunchbox Archive are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/), and each release is a `milestone-N` Git tag.
 
-## [Unreleased]
-
-Becomes `milestone-2` when tagged.
+## [milestone-2]
 
 ### Added
 - Frontend unit tests with Vitest and React Testing Library, covering hooks, forms, listing components, and `App`, with a coverage report (`npm test`, `npm run test:coverage`).
@@ -17,6 +15,8 @@ Becomes `milestone-2` when tagged.
 - Seed script (`npm run seed`) with test accounts and 15 sample listings.
 - Security evidence script (`server/test-security.js`) and captured before-fix results.
 - `CONTRIBUTING.md` documenting branching, commit, review, and release conventions.
+- `SECURITY.md` with a threat model, OWASP Top 10:2025 review, and before/after evidence.
+- Test and coverage section, Milestone 2 verification steps, and known gaps in the README.
 
 ### Changed
 - Create, edit, delete, and buy now require login. The seller and buyer come from the verified token, not the request body.
@@ -24,6 +24,9 @@ Becomes `milestone-2` when tagged.
 - The client loads every page of listings, so none are hidden from Browse, search, and filters.
 - Token secrets are required at startup; the insecure development fallbacks were removed.
 - Token signing and verification are pinned to HS256.
+- Renamed `Docs/` to `docs/` and `docs/Demos` to `docs/demos` so folder names are lowercase.
+- Pinned `jsdom` to v26 in `client/` so the unit tests run on older Node versions. Node 22 or newer is recommended.
+- `docs/QA.md` updated with the measured coverage and the Milestone 2 status.
 - Unexpected errors on listing routes return a generic 500 and no longer expose internal error text.
 
 ### Fixed

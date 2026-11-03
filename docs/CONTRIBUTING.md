@@ -1,6 +1,6 @@
 # Contributing to Lunchbox Archive
 
-This is how to work in this repo. It covers branching, commits, pull requests, tests, and releases. The detailed QA checklists live in [QA.md](QA.md).
+This is how Evan and Luke work in this repo. It covers branching, commits, pull requests, tests, and releases. The detailed QA checklists live in [QA.md](QA.md).
 
 ## Project layout
 
@@ -16,6 +16,11 @@ docs/     README, API contract, QA plan, security notes, evidence
   - Services hold business rules and ownership checks.
   - Repositories are the only code that talks to Prisma.
   - Do not call Prisma from routes or services.
+
+## Prerequisites
+
+- Node 22 or newer
+- A PostgreSQL database URL in `server/.env` (see `server/.env.example`)
 
 ## Branching
 
@@ -55,7 +60,7 @@ git checkout -b add-something
 
 Reviewers should pull the branch and run the verify steps, not just read the diff. If a change touches auth, ownership, or user input, the reviewer should also try to break it.
 
-When a PR depends on another, say "Merge #N first" at the top of its description.
+When a PR depends on another, say "Merge #N first" at the top of its description. This matters most when a client change depends on a server change (for example, the client stops sending a field the old server still expects): merge the server PR first.
 
 ## Tests
 
@@ -68,7 +73,7 @@ Run these before opening a PR.
 | Server smoke test | `server/` | `node test-manual.js` (server must be running) |
 | Security check | `server/` | `node test-security.js` (server must be running) |
 
-Coverage target (see [QA.md](QA.md)): 80% of lines overall, 90% for hooks and components. A PR should not lower coverage without a reason stated in its description.
+Coverage target (see [QA.md](QA.md)): 80% of lines overall and 90% for hooks and components in `client/`. Backend unit and integration tests are planned; `server/test-manual.js` needs updating for token auth. A PR should not lower coverage without a reason stated in its description.
 
 New behaviour needs a test. A bug fix needs a test that fails without the fix.
 
