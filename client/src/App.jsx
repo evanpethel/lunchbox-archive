@@ -12,13 +12,28 @@ function App() {
   const [listings, setListings] = useState([])
   const [view, setView] = useState("browse")
   const [apiError, setApiError] = useState("")
-  const { currentUser, register, login, logout, error } = useAuth()
+  const { currentUser, register, login, logout, expireSession, error } = useAuth()
 
-  function authHeaders() {
-    return {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${localStorage.getItem("accessToken")}`
+  // Single place for authenticated requests. If the server answers 401
+  // (token missing, invalid, or expired), log the user out and return null
+  // so callers can simply stop.
+  async function apiFetch(path, options = {}) {
+    const res = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("accessToken")}`
+      }
+    })
+
+    if (res.status === 401) {
+      expireSession()
+      setView("browse")
+      setApiError("")
+      return null
     }
+
+    return res
   }
 
   async function fetchListings() {
@@ -40,11 +55,12 @@ function App() {
   async function handleCreate(newListing) {
     setApiError("")
     try {
-      const res = await fetch(`${API_BASE}/listings`, {
+      // No sellerId here: the server takes the owner from the login token.
+      const res = await apiFetch("/listings", {
         method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({ ...newListing, sellerId: currentUser.id })
+        body: JSON.stringify(newListing)
       })
+      if (!res) return
       const data = await res.json()
       if (!res.ok) {
         setApiError(data.error.message)
@@ -60,10 +76,8 @@ function App() {
   async function handleBuy(id) {
     setApiError("")
     try {
-      const res = await fetch(`${API_BASE}/listings/${id}/buy`, {
-        method: "POST",
-        headers: authHeaders()
-      })
+      const res = await apiFetch(`/listings/${id}/buy`, { method: "POST" })
+      if (!res) return
       const data = await res.json()
       if (!res.ok) {
         setApiError(data.error.message)  // e.g. "Listing is no longer available" on 409
@@ -79,14 +93,14 @@ function App() {
   async function handleEdit(id, updatedFields) {
     setApiError("")
     try {
-      const res = await fetch(`${API_BASE}/listings/${id}`, {
+      const res = await apiFetch(`/listings/${id}`, {
         method: "PUT",
-        headers: authHeaders(),
         body: JSON.stringify(updatedFields)
       })
+      if (!res) return
       const data = await res.json()
       if (!res.ok) {
-        setApiError(data.error.message)
+        setApiError(data.error.message)  // 403 shows "You do not own this listing."
         return
       }
       await fetchListings()
@@ -98,10 +112,9 @@ function App() {
   async function handleDelete(id) {
     setApiError("")
     try {
-      const res = await fetch(`${API_BASE}/listings/${id}`, {
-        method: "DELETE",
-        headers: authHeaders()
-      })
+      const res = await apiFetch(`/listings/${id}`, { method: "DELETE" })
+      if (!res) return
+      // Success is 204 No Content, so there is no body to parse.
       if (!res.ok) {
         const data = await res.json()
         setApiError(data.error.message)
