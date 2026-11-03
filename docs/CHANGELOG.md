@@ -2,9 +2,7 @@
 
 All notable changes to Lunchbox Archive are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/), and each release is a `milestone-N` Git tag.
 
-## [Unreleased]
-
-Becomes `milestone-2` when tagged.
+## [milestone-2]
 
 ### Added
 - Frontend unit tests with Vitest and React Testing Library, covering hooks, forms, listing components, and `App`, with a coverage report (`npm test`, `npm run test:coverage`).

@@ -118,7 +118,7 @@ Categories follow [OWASP Top 10:2025](https://owasp.org/Top10/2025/).
 |---|---|---|---|
 | A01 | Broken Access Control | The main vulnerability found. Write routes had no authentication and no ownership check. Fixed by the control in section 3. | **Fixed** |
 | A02 | Security Misconfiguration | Insecure default signing secrets removed. The auth routes and the global error handler still return raw `err.message`. No security headers (for example `helmet`) are set. | Partly fixed; remaining items **open** |
-| A03 | Software Supply Chain Failures | Dependencies are installed from the npm registry with lockfiles. `npm audit` has not been run and recorded. | **Open**: run `npm audit` in `client/` and `server/` and record the result |
+| A03 | Software Supply Chain Failures | Dependencies come from the npm registry with lockfiles. `npm audit` on 2026-11-02: `client/` reports 6 moderate findings, all in development tooling (`eslint` and its plugins, through a `minimatch` denial-of-service advisory); nothing in `react` or `react-dom`, the code that ships to the browser. `server/` reports 6 (3 moderate, 2 high, 1 critical), all reached through `bcrypt` -> `@mapbox/node-pre-gyp` -> `tar`, which runs when the native bcrypt binary is installed, not while handling requests. The suggested fix is a breaking upgrade to bcrypt 6, which has not been tested with this app. | Reviewed; upgrade planned, risk **accepted** for Milestone 2 |
 | A04 | Cryptographic Failures | Passwords are stored as bcrypt hashes. Tokens are signed with secrets from the environment. TLS is not enforced in development. | Mitigated; **production TLS depends on deployment** |
 | A05 | Injection | All database access goes through Prisma's parameterised API. React escapes rendered text. The listing photo URL is only used as an image source and is not validated. | Mitigated |
 | A06 | Insecure Design | Authorization is enforced in the service layer, not only in the UI. The atomic buy prevents double sales. No rate limiting or abuse controls. | Mostly mitigated; rate limiting **open** |
@@ -130,7 +130,7 @@ Categories follow [OWASP Top 10:2025](https://owasp.org/Top10/2025/).
 ## 5. Known gaps and planned work
 
 1. Replace `err.message` in `auth.routes.js` and the global error handler in `index.js` with generic messages (A02, A10).
-2. Run `npm audit` on both packages and record the results (A03).
+2. Upgrade `bcrypt` to v6 and the `eslint` packages, re-run the tests, and clear the `npm audit` findings listed under A03.
 3. Add login rate limiting (A07, A06).
 4. Add basic security headers with `helmet` (A02).
 5. Consider httpOnly cookies instead of `localStorage` for tokens (A07). This is a larger change and is accepted as a risk for now.
