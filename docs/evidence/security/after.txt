@@ -1,0 +1,21 @@
+Target: http://localhost:5000/api
+
+Created test users sec_alice_1793673072774 (owner) and sec_bob_1793673073346 (attacker)
+
+Controls (legitimate use)
+✅ control     Owner can edit their own listing (200)
+✅ control     Owner can delete their own listing (204)
+
+Authentication (requests without a valid token)
+✅ secure      Create listing with no token is rejected (401)
+✅ secure      Edit listing with no token is rejected (401)
+✅ secure      Delete listing with no token is rejected (401)
+✅ secure      Buy listing with no token is rejected (401)
+✅ secure      Edit listing with a forged token is rejected (401)
+
+Authorization (logged-in user acting on someone else's listing)
+✅ secure      Non-owner edit is rejected (403) and the listing is unchanged
+✅ secure      Non-owner delete is rejected (403) and the listing still exists
+✅ secure      Listing owner comes from the token, not the request body
+
+8 secure, 0 vulnerable
