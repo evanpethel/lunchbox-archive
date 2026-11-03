@@ -29,9 +29,11 @@ beforeEach(() => {
   }
   vi.stubGlobal("fetch", vi.fn(async (url, options = {}) => {
     const method = options.method || "GET"
-    calls.push({ url, method, options })
-    const handler = routes[`${method} ${url}`]
-    return jsonResponse(handler ? handler() : { status: 404, body: { error: { message: "not found" } } })
+    const [path, queryString = ""] = url.split("?")
+    const query = new URLSearchParams(queryString)
+    calls.push({ url: path, method, options, query })
+    const handler = routes[`${method} ${path}`]
+    return jsonResponse(handler ? handler(query) : { status: 404, body: { error: { message: "not found" } } })
   }))
 })
 
@@ -73,6 +75,24 @@ describe("App: browsing", () => {
     expect(screen.getByText("Hi, seed_seller1")).toBeInTheDocument()
     expect(screen.getByText("Superman Lunchbox")).toBeInTheDocument()
     expect(screen.queryByText("Peanuts Box")).not.toBeInTheDocument()
+  })
+})
+
+describe("App: pagination", () => {
+  it("loads every page of listings, not just the first", async () => {
+    const page1 = Array.from({ length: 10 }, (_, i) => ({ ...sampleListings[0], id: `a${i}`, title: `Box A${i}` }))
+    const page2 = [{ ...sampleListings[1], id: "b0", title: "Box on page two" }]
+    routes["GET /api/listings"] = query =>
+      query.get("page") === "2"
+        ? { status: 200, body: { listings: page2, hasMore: false } }
+        : { status: 200, body: { listings: page1, hasMore: true } }
+
+    loginAsSeller()
+    render(<App />)
+
+    expect(await screen.findByText("Box on page two")).toBeInTheDocument()
+    expect(screen.getByText("Box A0")).toBeInTheDocument()
+    expect(callsTo("GET", "/api/listings").map(c => c.query.get("page"))).toEqual(["1", "2"])
   })
 })
 

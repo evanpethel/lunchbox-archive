@@ -36,13 +36,25 @@ function App() {
     return res
   }
 
+  // The server returns listings one page at a time (10 per page). Keep asking
+  // for pages until it says there are no more, so search and the filters,
+  // which run in the browser, can see every listing.
   async function fetchListings() {
     try {
-      const res = await fetch(`${API_BASE}/listings`)
-      const data = await res.json()
-      if (res.ok) {
-        setListings(data.listings)
+      let all = []
+      let page = 1
+      let hasMore = true
+
+      while (hasMore && page <= 50) {  // 50 is a safety cap against a runaway loop
+        const res = await fetch(`${API_BASE}/listings?page=${page}`)
+        const data = await res.json()
+        if (!res.ok) return
+        all = all.concat(data.listings)
+        hasMore = data.hasMore === true
+        page += 1
       }
+
+      setListings(all)
     } catch (err) {
       setApiError("Could not load listings. Is the server running?")
     }
