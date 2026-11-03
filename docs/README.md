@@ -70,6 +70,7 @@ All errors are resolved, release documentation is written and edited, all milest
 
 # Milestone 1:
 ## Verification:
+Demo in docs/demos/
 You can register a new account in step 1, or log in with a seeded test account instead.
 1. Register a new account
 2. Create a listing with all fields filled in
@@ -98,6 +99,7 @@ A manual test script covering all of the above (plus the concurrent-buy race con
 
 # Milestone 2:
 ## Verification:
+Demo in docs/demos/
 Start the backend and frontend as described in Setup, and run `npm run seed` first so the test accounts exist.
 1. **App starts.** `curl http://localhost:5000/api/health` responds, and http://localhost:5173 shows the login screen.
 2. **Milestone 1 workflow still works.** Follow the Milestone 1 verification steps above.
