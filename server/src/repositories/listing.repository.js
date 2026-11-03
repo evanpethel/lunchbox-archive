@@ -20,9 +20,19 @@ export const ListingRepository = {
         return { listings: rows.slice(0, pageSize), hasMore };
     },
 
+    // Public lookup: only returns listings that are still for sale.
     async findListing({ selectedId }) {
         const listing = await prisma.post.findFirst({
             where: { id: selectedId, status: "listed" },
+        });
+
+        return { listing };
+    },
+
+    // Lookup by id regardless of status; used for ownership checks.
+    async findById({ id }) {
+        const listing = await prisma.post.findUnique({
+            where: { id },
         });
 
         return { listing };
@@ -47,15 +57,16 @@ export const ListingRepository = {
         return { listing };
     },
 
-    async purchase({ targetId }) {
+    // Atomic: the WHERE includes status = 'listed', so only one of several
+    // simultaneous buyers can match the row. count === 0 means already sold
+    // (or the listing doesn't exist).
+    async purchase({ targetId, buyerId }) {
 
         const result = await prisma.post.updateMany({
             where: { id: targetId, status: "listed" },
-            data: { status: "sold" },
+            data: { status: "sold", soldTo: buyerId },
         });
 
-        // result.count is 0 if no row matched (already sold, or doesn't exist) —
-        // this is what makes the buy action safe against two simultaneous requests
         return { sold: result.count > 0 };
     },
 };

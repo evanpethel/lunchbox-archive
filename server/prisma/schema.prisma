@@ -10,7 +10,8 @@ model User {
   id           String @id @default(uuid())
   username     String @unique
   passwordHash String
-  posts        Post[]
+  posts        Post[] @relation("SellerPosts")
+  purchases    Post[] @relation("BuyerPosts")
 }
 
 enum PostStatus {
@@ -29,5 +30,7 @@ model Post {
   maker       String
   status      PostStatus @default(listed)
   sellerId    String
-  seller      User       @relation(fields: [sellerId], references: [id])
+  seller      User       @relation("SellerPosts", fields: [sellerId], references: [id])
+  soldTo      String?
+  buyer       User?      @relation("BuyerPosts", fields: [soldTo], references: [id])
 }
