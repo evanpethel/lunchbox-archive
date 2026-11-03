@@ -1,0 +1,21 @@
+Target: http://localhost:5000/api
+
+Created test users sec_alice_1793654813139 (owner) and sec_bob_1793654813652 (attacker)
+
+Controls (legitimate use)
+✅ control     Owner can edit their own listing (200)
+✅ control     Owner can delete their own listing (204)
+
+Authentication (requests without a valid token)
+❌ VULNERABLE  Create listing with no token is rejected (401)  -> got 201
+❌ VULNERABLE  Edit listing with no token is rejected (401)  -> got 200
+❌ VULNERABLE  Delete listing with no token is rejected (401)  -> got 204
+❌ VULNERABLE  Buy listing with no token is rejected (401)  -> got 200
+❌ VULNERABLE  Edit listing with a forged token is rejected (401)  -> got 200
+
+Authorization (logged-in user acting on someone else's listing)
+❌ VULNERABLE  Non-owner edit is rejected (403) and the listing is unchanged  -> got 200, title is now "HACKED by bob"
+❌ VULNERABLE  Non-owner delete is rejected (403) and the listing still exists  -> delete got 204, listing lookup got 404
+❌ VULNERABLE  Listing owner comes from the token, not the request body  -> got 201, sellerId = dad479db-8b3d-4e3f-93de-edd31b0f4e35 (bob is a3a7de21-aec9-4f58-8f74-63157898f6f2, alice is dad479db-8b3d-4e3f-93de-edd31b0f4e35)
+
+0 secure, 8 vulnerable
